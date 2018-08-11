@@ -35,6 +35,8 @@ export class Room<T= any> extends StateContainer<T & any> {
     public connection: Connection;
     private _previousState: any;
 
+    protected now: Function = (typeof (window) !== "undefined" && window.performance && window.performance.now && (window.performance.now).bind(window.performance)) || Date.now;
+
     constructor(name: string, options?: any) {
         super({});
         this.id = null;
@@ -124,11 +126,11 @@ export class Room<T= any> extends StateContainer<T & any> {
 
         this.clock.start();
 
-        this.onStateChange.dispatch(remoteCurrentTime, Date.now(), state);
+        this.onStateChange.dispatch(remoteCurrentTime, this.now(), state);
     }
 
     protected patch(serverTimeStamp: number, binaryPatch) {
-        let clientReceiveTime: number = Date.now();
+        const clientReceiveTime: number = this.now();
 
         // apply patch
         this._previousState = Buffer.from(fossilDelta.apply(this._previousState, binaryPatch));

@@ -23,6 +23,7 @@ export declare class Room<T = any> extends StateContainer<T & any> {
     onLeave: Signal;
     connection: Connection;
     private _previousState;
+    protected now: Function;
     constructor(name: string, options?: any);
     connect(endpoint: string): void;
     leave(): void;
