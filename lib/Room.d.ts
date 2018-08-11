@@ -30,5 +30,5 @@ export declare class Room<T = any> extends StateContainer<T & any> {
     removeAllListeners(): void;
     protected onMessageCallback(event: any): void;
     protected setState(encodedState: Buffer, remoteCurrentTime?: number, remoteElapsedTime?: number): void;
-    protected patch(binaryPatch: any): void;
+    protected patch(serverTimeStamp: number, binaryPatch: any): void;
 }

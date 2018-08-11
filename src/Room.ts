@@ -68,7 +68,7 @@ export class Room<T= any> extends StateContainer<T & any> {
     }
 
     public send(data): void {
-        this.connection.send([ Protocol.ROOM_DATA, this.id, data ]);
+        this.connection.send([Protocol.ROOM_DATA, this.id, data]);
     }
 
     public get hasJoined () {
@@ -85,7 +85,7 @@ export class Room<T= any> extends StateContainer<T & any> {
     }
 
     protected onMessageCallback(event) {
-        const message = msgpack.decode( new Uint8Array(event.data) );
+        const message = msgpack.decode(new Uint8Array(event.data));
         const code = message[0];
 
         if (code === Protocol.JOIN_ROOM) {
@@ -101,10 +101,10 @@ export class Room<T= any> extends StateContainer<T & any> {
             const remoteCurrentTime = message[2];
             const remoteElapsedTime = message[3];
 
-            this.setState( state, remoteCurrentTime, remoteElapsedTime );
+            this.setState(state, remoteCurrentTime, remoteElapsedTime);
 
         } else if (code === Protocol.ROOM_STATE_PATCH) {
-            this.patch( message[1] );
+            this.patch(message[1], message[2]);
 
         } else if (code === Protocol.ROOM_DATA) {
             this.onMessage.dispatch(message[1]);
@@ -114,11 +114,11 @@ export class Room<T= any> extends StateContainer<T & any> {
         }
     }
 
-    protected setState( encodedState: Buffer, remoteCurrentTime?: number, remoteElapsedTime?: number ): void {
+    protected setState(encodedState: Buffer, remoteCurrentTime?: number, remoteElapsedTime?: number): void {
         const state = msgpack.decode(encodedState);
         this.set(state);
 
-        this._previousState = new Uint8Array( encodedState );
+        this._previousState = new Uint8Array(encodedState);
 
         // set remote clock properties
         if (remoteCurrentTime && remoteElapsedTime) {
@@ -128,17 +128,19 @@ export class Room<T= any> extends StateContainer<T & any> {
 
         this.clock.start();
 
-        this.onStateChange.dispatch(state);
+        this.onStateChange.dispatch(remoteCurrentTime, Date.now(), state);
     }
 
-    protected patch( binaryPatch ) {
+    protected patch(serverTimeStamp: number, binaryPatch) {
+        const clientReceiveTime: number = Date.now();
+
         // apply patch
-        this._previousState = Buffer.from(fossilDelta.apply( this._previousState, binaryPatch));
+        this._previousState = Buffer.from(fossilDelta.apply(this._previousState, binaryPatch));
 
         // trigger state callbacks
-        this.set( msgpack.decode( this._previousState ) );
+        this.set(msgpack.decode(this._previousState));
 
-        this.onStateChange.dispatch(this.state);
+        this.onStateChange.dispatch(serverTimeStamp, clientReceiveTime, this.state);
     }
 
 }
