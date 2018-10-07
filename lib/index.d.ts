@@ -1,5 +1,5 @@
 import './legacy';
-export { Client } from './Client';
+export { Client, JoinOptions } from './Client';
 export { Protocol } from './Protocol';
 export { Room } from './Room';
 export { DataChange } from '@gamestdio/state-listener';

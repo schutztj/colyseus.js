@@ -27,6 +27,7 @@ export declare class Room<T = any> extends StateContainer<T & any> {
     connect(endpoint: string): void;
     leave(): void;
     send(data: any): void;
+    readonly hasJoined: boolean;
     removeAllListeners(): void;
     protected onMessageCallback(event: any): void;
     protected setState(encodedState: Buffer, remoteCurrentTime?: number, remoteElapsedTime?: number): void;
